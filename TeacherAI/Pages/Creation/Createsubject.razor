@@ -1,0 +1,58 @@
+﻿@page "/createsubject"
+@using TeacherAI.Data;
+
+
+<h3>Create Subject with Stages and Topics</h3>
+
+<EditForm Model="@subject" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Name">Subject Name:</label>
+        <InputText id="Name" @bind-Value="subject.Name" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="StageName">Stage Name:</label>
+        <InputText id="StageName" @bind-Value="stageName" class="form-control" />
+        <button class="btn btn-primary" @onclick="AddStage">Add Stage</button>
+    </div>
+
+    <div class="form-group">
+        <label for="Content">Topic Content:</label>
+        <InputText id="Content" @bind-Value="content" class="form-control" />
+        <button class="btn btn-primary" @onclick="AddTopic">Add Topic</button>
+    </div>
+
+    <button type="submit" class="btn btn-success">Create Subject</button>
+</EditForm>
+
+@code {
+    private Subject subject = new Subject();
+    private string stageName = "";
+    private string content = "";
+
+    private void AddStage()
+    {
+        subject.Stages.Add(new Stage { Name = stageName });
+        stageName = "";
+    }
+
+    private void AddTopic()
+    {
+        if (subject.Stages.Count > 0)
+        {
+            subject.Stages[subject.Stages.Count - 1].Topics.Add(new Topic { Content = content });
+            content = "";
+        }
+    }
+
+    private void HandleValidSubmit()
+    {
+        // Handle submission (e.g., save to database)
+        // You can use Entity Framework or any other method to save the subject, stages, and topics
+        // Remember to add the necessary database operations here
+        // e.g., dbContext.Subjects.Add(subject); dbContext.SaveChanges();
+    }
+}

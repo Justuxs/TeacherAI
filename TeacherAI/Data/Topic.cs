@@ -4,7 +4,7 @@
     {
         public long Id { get; set; }
         public long StageID { get; set; }
-        public long Content { get; set; }
+        public string Content { get; set; }
 
         public Stage? Stage { get; set; }
     }

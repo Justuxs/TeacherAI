@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using TeacherAI.Data;
 using Microsoft.EntityFrameworkCore;
 using TeacherAI.EF;
+using TeacherAI.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<SubjectService>();
 
 builder.Configuration.AddJsonFile("appsettings.json");
 

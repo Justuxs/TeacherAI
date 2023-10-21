@@ -1,0 +1,85 @@
+﻿@page "/stagedetails/{id}"
+@using TeacherAI.Data;
+@using TeacherAI.Service;
+
+@inject SubjectService SubjectService
+
+<h3>Stage Details</h3>
+
+@if (stage != null)
+{
+    <div class="box-details">
+        <h4>@stage.Name</h4>
+        <ul>
+            @foreach (var topic in stage.Topics)
+            {
+                <li>
+                    @topic.Content
+                    <button @onclick="() => EditTopic(topic)">Edit</button>
+                    <button @onclick="() => DeleteTopic(topic)">Delete</button>
+                </li>
+            }
+        </ul>
+
+        <form @onsubmit="AddTopic">
+            <input type="text" @bind="newTopicContent" />
+            <button type="submit">Add Topic</button>
+        </form>
+    </div>
+}
+else
+{
+    <p>No stage found.</p>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    private Stage stage;
+    private string newTopicContent;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int stageId))
+        {
+            // Assuming you have a method to get stage details by ID
+            stage = GetStageDetailsById(stageId);
+        }
+        else
+        {
+            stage = null;
+        }
+    }
+
+    private Stage GetStageDetailsById(int id)
+    {
+        var allStages = SubjectService.GenerateRandomSubjects(1, 2, 2);
+        return allStages[0].Stages[0];
+    }
+
+    private void EditTopic(Topic topic)
+    {
+        // Implement edit functionality
+        // You can open a modal or navigate to an edit page
+    }
+
+    private void DeleteTopic(Topic topic)
+    {
+        // Implement delete functionality
+        // Call a method in your SubjectService to delete the topic
+    }
+
+    private void AddTopic()
+    {
+        if (!string.IsNullOrEmpty(newTopicContent))
+        {
+            // Create a new Topic object and add it to the stage's Topics
+            var newTopic = new Topic { Content = newTopicContent };
+            stage.Topics.Add(newTopic);
+
+            // Clear the input field
+            newTopicContent = string.Empty;
+        }
+    }
+}

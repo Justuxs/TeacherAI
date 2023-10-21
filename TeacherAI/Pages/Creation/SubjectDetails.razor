@@ -1,0 +1,66 @@
+﻿@page "/subjectdetails/{id}"
+@using TeacherAI.Data;
+@using TeacherAI.Service;
+
+@inject SubjectService SubjectService
+@inject NavigationManager NavigationManager
+
+<h3>Subject Details</h3>
+
+@if (subject != null)
+{
+    <div class="centered-container">
+        <div class="subject-box">
+            <h4>@subject.Name</h4>
+            <div class="flex-container">
+                @foreach (var stage in subject.Stages)
+                {
+                    <a href="/stagedetails/@stage.Id">
+                        <div class="subject-box">
+                            <h4>@stage.Name</h4>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+
+
+    <button class="back-button" @onclick="GoBack">Back</button>
+}
+else
+{
+    <p>No subject found.</p>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    private Subject subject;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int subjectId))
+        {
+            // Assuming you have a method to get subject details by ID
+            subject = GetSubjectDetailsById(subjectId);
+        }
+        else
+        {
+            subject = null;
+        }
+    }
+
+    private Subject GetSubjectDetailsById(int id)
+    {
+        var allSubjects = SubjectService.GenerateRandomSubjects(1, 2, 2);
+        return allSubjects[0];
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/subjects");
+    }
+}

@@ -1,0 +1,24 @@
+﻿@page "/subjects"
+@using TeacherAI.Data;
+
+<h3>All Subjects</h3>
+
+<div class="flex-container">
+    @foreach (var subject in subjects)
+    {
+        <a href="/subjectdetails/@subject.Id">
+            <div class="subject-box" >
+                <h4 >@subject.Name</h4>
+            </div>
+        </a>
+    }
+</div>
+
+@code {
+    private List<Subject> subjects = new List<Subject>
+    {
+        // Populate this list with actual subjects
+        new Subject { Id = 1, Name = "Subject 1" },
+        new Subject { Id = 2, Name = "Subject 2" }
+    };
+}
