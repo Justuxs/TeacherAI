@@ -1,7 +1,6 @@
 ﻿@page "/stagedetails/{id}"
 @using TeacherAI.Data;
 @using TeacherAI.Service;
-
 @inject SubjectService SubjectService
 
 <h3>Stage Details</h3>
@@ -10,21 +9,42 @@
 {
     <div class="box-details">
         <h4>@stage.Name</h4>
-        <ul>
-            @foreach (var topic in stage.Topics)
-            {
-                <li>
-                    @topic.Content
-                    <button @onclick="() => EditTopic(topic)">Edit</button>
-                    <button @onclick="() => DeleteTopic(topic)">Delete</button>
-                </li>
-            }
-        </ul>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Topic Content</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var topic in stage.Topics)
+                {
+                    var index = stage.Topics.IndexOf(topic);
+                    <tr>
+                        <td>@topic.Content</td>
+                        <td>
+                            <button @onclick="() => OpenEditModal(topic)">Edit</button>
+                            <button @onclick="() => DeleteTopic(topic)">Delete</button>
+                            @if (index != 0)
+                            {
+                                <button @onclick="() => MoveTopicUp(topic)">Up</button>
+                            }
+                            @if (index != stage.Topics.Count - 1)
+                            {
+                                <button @onclick="() => MoveTopicDown(topic)">Down</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
         <form @onsubmit="AddTopic">
             <input type="text" @bind="newTopicContent" />
             <button type="submit">Add Topic</button>
         </form>
+
     </div>
 }
 else
@@ -38,12 +58,15 @@ else
 
     private Stage stage;
     private string newTopicContent;
+    private Topic editedTopic;
+    private string editedTopicContent;
+    private bool isEditModalOpen = false;
 
+    // Assuming you have a method to get stage details by ID
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int stageId))
         {
-            // Assuming you have a method to get stage details by ID
             stage = GetStageDetailsById(stageId);
         }
         else
@@ -58,10 +81,22 @@ else
         return allStages[0].Stages[0];
     }
 
-    private void EditTopic(Topic topic)
+    private void OpenEditModal(Topic topic)
     {
-        // Implement edit functionality
-        // You can open a modal or navigate to an edit page
+        editedTopic = topic;
+        editedTopicContent = topic.Content;
+        isEditModalOpen = true;
+    }
+
+    private async Task SaveEditedTopic()
+    {
+        editedTopic.Content = editedTopicContent;
+        isEditModalOpen = false;
+    }
+
+    private void CloseEditModal()
+    {
+        isEditModalOpen = false;
     }
 
     private void DeleteTopic(Topic topic)
@@ -74,12 +109,50 @@ else
     {
         if (!string.IsNullOrEmpty(newTopicContent))
         {
-            // Create a new Topic object and add it to the stage's Topics
             var newTopic = new Topic { Content = newTopicContent };
             stage.Topics.Add(newTopic);
 
-            // Clear the input field
             newTopicContent = string.Empty;
         }
     }
+
+    private void MoveTopicUp(Topic topic)
+    {
+        var index = stage.Topics.IndexOf(topic);
+        if (index > 0)
+        {
+            var temp = stage.Topics[index];
+            stage.Topics.RemoveAt(index);
+            stage.Topics.Insert(index - 1, temp);
+        }
+    }
+
+    private void MoveTopicDown(Topic topic)
+    {
+        var index = stage.Topics.IndexOf(topic);
+        if (index < stage.Topics.Count - 1)
+        {
+            var temp = stage.Topics[index];
+            stage.Topics.RemoveAt(index);
+            stage.Topics.Insert(index + 1, temp);
+        }
+    }
 }
+
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table th,
+        .table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+</style>
