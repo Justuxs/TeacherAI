@@ -1,0 +1,242 @@
+﻿@page "/teach"
+@using TeacherAI.Data;
+@using TeacherAI.Service;
+@inject SubjectService SubjectService
+
+<h3>Subject Selection</h3>
+
+<style>
+    .reset-button {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+
+    .selection-row {
+        display: flex;
+        justify-content: center;
+    }
+
+    .selection-box {
+        flex: 1;
+        border: 1px solid #ccc;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        margin: 10px;
+    }
+
+    .select-box {
+        width: 100%;
+        padding: 5px;
+    }
+
+    .button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    .learning-container {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    .text-area {
+        width: 80%;
+        height: 200px;
+        margin-top: 20px;
+    }
+
+    .button-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .input-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .input {
+        width: 60%;
+        padding: 10px;
+        font-size: 16px;
+    }
+</style>
+
+<div>
+    <button @onclick="Reset">Reset</button>
+</div>
+
+<div class="container">
+    @if (!learningStarted && selectingSubject)
+    {
+        <div class="selection-row">
+            <div class="selection-box">
+                <h4>Select Subject</h4>
+                <select class="select-box" @onchange="HandleSubjectSelection">
+                    <option value="" disabled selected hidden>-- Select a subject --</option>
+                    @foreach (var subject in subjects)
+                    {
+                        <option value="@subject.Name">@subject.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (!learningStarted && selectingStage)
+    {
+        selectingSubject = false;
+        <div class="selection-row">
+            <div class="selection-box">
+                <h4>Select Stage</h4>
+                <select class="select-box" @onchange="HandleStageSelection">
+                    <option value="" disabled selected hidden>-- Select a stage --</option>
+                    @foreach (var stage in stages)
+                    {
+                        <option value="@stage.Name">@stage.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (!learningStarted && selectingTopic)
+    {
+        <div class="selection-row">
+            <div class="selection-box">
+                <h4>Select Topic</h4>
+                <select class="select-box" @onchange="HandleTopicSelection">
+                    <option value="" disabled selected hidden>-- Select a topic --</option>
+                    @foreach (var topic in topics)
+                    {
+                        <option value="@topic.Content">@topic.Content</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (isSelectionDone() && !learningStarted)
+    {
+        <div class="button-container">
+            <button @onclick="BeginLearning" class="button">Mokytis</button>
+        </div>
+    }
+
+    @if (learningStarted)
+    {
+        <div class="learning-container">
+            <h3>Learning Mode</h3>
+            <textarea class="text-area" placeholder="Begin learning..."></textarea>
+            <div class="button-container">
+                <button class="button">Toliau</button>
+                <button class="button">Spresti testa</button>
+            </div>
+            <div class="input-container">
+                <input type="text" class="input" placeholder="Klausti mokytojo" />
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    private List<Subject> subjects;
+    private List<Stage> stages;
+    private List<Topic> topics;
+
+    private Subject selectedSubject;
+    private Stage selectedStage;
+    private Topic selectedTopic;
+
+
+    private bool selectionDone = false;
+
+    private bool selectingSubject = true;
+    private bool selectingStage = false;
+    private bool selectingTopic = false;
+
+
+    private bool learningStarted = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        subjects = SubjectService.GenerateRandomSubjects(2, 2, 2);
+    }
+
+    void HandleSubjectSelection(ChangeEventArgs e)
+    {
+        var subjectName = e.Value.ToString();
+        Subject subject = subjects.FirstOrDefault(s => s.Name == subjectName);
+
+        if (subject != null)
+        {
+            stages = subject.Stages;
+            selectedSubject = subject;
+            selectingSubject = false;
+            selectingStage = true;
+        }
+    }
+    void HandleStageSelection(ChangeEventArgs e)
+    {
+        var stageName = e.Value.ToString();
+        Stage stage = stages.FirstOrDefault(s => s.Name == stageName);
+
+        if (stage != null)
+        {
+            topics = stage.Topics;
+            selectedStage = stage;
+            selectingStage = false;
+            selectingTopic = true;
+        }
+    }
+    void HandleTopicSelection(ChangeEventArgs e)
+    {
+        var topicName = e.Value.ToString();
+        Topic topic = topics.FirstOrDefault(s => s.Content == topicName);
+
+        if (topic != null)
+        {
+            selectedTopic = topic;
+            selectingTopic = false;
+        }
+    }
+
+    bool isSelectionDone()
+    {
+        return (selectedTopic != null && selectedStage != null && selectedSubject != null);
+    }
+
+    private void BeginLearning()
+    {
+        learningStarted = true;
+    }
+
+    private void Reset()
+    {
+        stages.Clear();
+        topics.Clear();
+
+        selectedSubject = null;
+        selectedStage = null;
+        selectedTopic = null;
+
+        selectionDone = false;
+        selectingSubject = true;
+        selectingStage = false;
+        selectingTopic = false;
+        learningStarted = false;
+    }
+}
