@@ -14,7 +14,9 @@
             <thead>
                 <tr>
                     <th>Topic Content</th>
-                    <th>Actions</th>
+                    <th>Keisti pozicija</th>
+                    <th>Ištrinti</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -24,17 +26,23 @@
                     <tr>
                         <td>@topic.Content</td>
                         <td>
-                            <button @onclick="() => OpenEditModal(topic)">Edit</button>
-                            <button @onclick="() => DeleteTopic(topic)">Delete</button>
-                            @if (index != 0)
-                            {
-                                <button @onclick="() => MoveTopicUp(topic)">Up</button>
-                            }
-                            @if (index != stage.Topics.Count - 1)
-                            {
-                                <button @onclick="() => MoveTopicDown(topic)">Down</button>
-                            }
+                            <div class="action-column">
+                                @if (index != 0)
+                                {
+                                    <button @onclick="() => MoveTopicUp(topic)">Up</button>
+                                }
+                                @if (index != stage.Topics.Count - 1)
+                                {
+                                    <button @onclick="() => MoveTopicDown(topic)">Down</button>
+                                }
+                            </div>
                         </td>
+                        <td>
+                            <div class="action-column">
+                                <button @onclick="() => DeleteTopic(topic)">Delete</button>
+                            </div>
+                        </td>
+
                     </tr>
                 }
             </tbody>
@@ -101,8 +109,7 @@ else
 
     private void DeleteTopic(Topic topic)
     {
-        // Implement delete functionality
-        // Call a method in your SubjectService to delete the topic
+        stage.Topics.Remove(topic);
     }
 
     private void AddTopic()
@@ -149,10 +156,15 @@ else
         .table td {
             border: 1px solid #ccc;
             padding: 8px;
-            text-align: left;
+            text-align: center;
         }
 
         .table th {
             background-color: #f2f2f2;
+            text-align: center;
         }
+
+    .action-column button {
+        margin-right: 5px;
+    }
 </style>
