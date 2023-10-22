@@ -9,25 +9,36 @@
 
 @if (subject != null)
 {
+    <button class="back-button" @onclick="GoBack">Back</button>
+
+
     <div class="centered-container">
         <div class="subject-box">
             <h4>@subject.Name</h4>
             <div class="flex-container">
                 @foreach (var stage in subject.Stages)
                 {
-                    <a href="/stagedetails/@stage.Id">
+                    <button class="transparent-button" @onclick="() => GoToStageDetails((int)stage.Id)">
                         <div class="subject-box">
-                            <h4>@stage.Name</h4>
+                            <div class="flex-container @((deleteMode) ? "deleteMode" : "")">
+                                <h4>@stage.Name</h4>
+                            </div>
                         </div>
-                    </a>
+                    </button>
                 }
             </div>
         </div>
     </div>
 
+    @if (deleteMode)
+    {
+                <button class="delete-button-active" @onclick="ToggleDeleteMode">Cancel Delete</button>
+    }
+    else
+    {
+                <button class="delete-button-inactive" @onclick="ToggleDeleteMode">Delete Stages</button>
+    }
 
-
-    <button class="back-button" @onclick="GoBack">Back</button>
 }
 else
 {
@@ -39,18 +50,29 @@ else
     public string id { get; set; }
 
     private Subject subject;
+    private bool deleteMode = false;
 
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int subjectId))
         {
-            // Assuming you have a method to get subject details by ID
             subject = GetSubjectDetailsById(subjectId);
         }
         else
         {
             subject = null;
         }
+    }
+
+    private void GoToStageDetails(int stageId)
+    {
+        if (deleteMode)
+        {
+            var deleted = subject.Stages.FirstOrDefault(x => x.Id == stageId);
+            if (deleted != null) subject.Stages.Remove(deleted);
+            return;
+        }
+        NavigationManager.NavigateTo($"/stagedetails/{stageId}");
     }
 
     private Subject GetSubjectDetailsById(int id)
@@ -63,4 +85,48 @@ else
     {
         NavigationManager.NavigateTo("/subjects");
     }
+
+    private void ToggleDeleteMode()
+    {
+        deleteMode = !deleteMode;
+    }
 }
+
+<style>
+    .delete-button-inactive {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .delete-button-inactive:hover {
+            background-color: #dc3545;
+        }
+
+        .delete-button-inactive .subject-box {
+            border: 1px solid #dc3545;
+        }
+
+    .delete-button-active {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .delete-button-active:hover {
+            background-color: #007bff;
+        }
+
+        .delete-button-active .subject-box {
+            border: 1px solid #007bff;
+        }
+
+    .deleteMode h4 {
+        color: red;
+    }
+
+</style>
