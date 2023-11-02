@@ -65,11 +65,11 @@ else
     private Subject subject;
     private bool deleteMode = false;
 
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int subjectId))
         {
-            subject = GetSubjectDetailsById(subjectId);
+            subject = await SubjectService.GetSubjectFullAsync(subjectId);//GetSubjectDetailsById(subjectId);
         }
         else
         {
@@ -79,26 +79,28 @@ else
 
     private string newStageName;
 
-    private void AddStage()
+    private async Task AddStage()
     {
         if (!string.IsNullOrEmpty(newStageName))
         {
-            var newStage = new Stage { Name = newStageName, Id = subject.Stages.Count + 1 };
-            subject.Stages.Add(newStage);
-
+            var newStage = new Stage { Name = newStageName, SubjectID = subject.Id };
+            await SubjectService.AddStageToSubjectAsync(subject.Id, newStage);
             newStageName = string.Empty;
+            OnInitializedAsync();
         }
     }
 
-    private void GoToStageDetails(int stageId)
+    private async Task GoToStageDetails(long stageId)
     {
         if (deleteMode)
         {
-            var deleted = subject.Stages.FirstOrDefault(x => x.Id == stageId);
-            if (deleted != null) subject.Stages.Remove(deleted);
-            return;
+            await SubjectService.DeleteStageFromSubjectAsync(subject.Id, stageId);
+            OnInitializedAsync();
         }
-        NavigationManager.NavigateTo($"/stagedetails/{stageId}");
+        else
+        {
+            NavigationManager.NavigateTo($"/stagedetails/{stageId}");
+        }
     }
 
     private Subject GetSubjectDetailsById(int id)
@@ -120,7 +122,7 @@ else
 
 <style>
 
-    .deleteMode h4{
+    .deleteMode h4 {
         color: red;
     }
 

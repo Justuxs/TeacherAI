@@ -1,24 +1,57 @@
 ﻿@page "/subjects"
 @using TeacherAI.Data;
+@using TeacherAI.Service;
+@inject SubjectService SubjectService
 
-<h3>All Subjects</h3>
 
-<div class="flex-container">
-    @foreach (var subject in subjects)
-    {
-        <a href="/subjectdetails/@subject.Id">
-            <div class="subject-box" >
-                <h4 >@subject.Name</h4>
-            </div>
-        </a>
-    }
+<div class="row">
+    <div class="col-md-4 text-center">
+        <input type="text" @bind="newSubjectName" />
+        <button class="add-stage-button" @onclick="AddSubject">Add Stage</button>
+    </div>
 </div>
 
+@if (subjects == null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <h3>All Subjects</h3>
+
+    <div class="flex-container">
+        @foreach (var subject in subjects)
+        {
+            <a href="/subjectdetails/@subject.Id">
+                <div class="subject-box">
+                    <h4>@subject.Name</h4>
+                </div>
+                <button @onclick="() => DeleteSubject(subject.Id)">Delete</button>
+
+            </a>
+        }
+    </div>
+}
+
+
 @code {
-    private List<Subject> subjects = new List<Subject>
+    private List<Subject> subjects;
+    private string newSubjectName;
+
+    protected override async Task OnInitializedAsync()
     {
-        // Populate this list with actual subjects
-        new Subject { Id = 1, Name = "Subject 1" },
-        new Subject { Id = 2, Name = "Subject 2" }
-    };
+        subjects = await SubjectService.GetSubjectsAsync();
+    }
+
+    private async Task DeleteSubject(long subjectId)
+    {
+        await SubjectService.DeleteSubjectAsync(subjectId);
+        subjects = await SubjectService.GetSubjectsAsync();
+    }
+
+    private async Task AddSubject()
+    {
+        await SubjectService.AddSubjectAsync(newSubjectName);
+        subjects = await SubjectService.GetSubjectsAsync();
+    }
 }

@@ -95,31 +95,35 @@
     <div class="column-left">
         <button @onclick="Reset">Reset</button>
     </div>
-    <div class="column-mid">
-        <div class="info">
-            @if (selectedSubject != null && selectedStage == null && selectedTopic == null)
-            {
-                <div class="selected-info">
-                    <span>@selectedSubject.Name</span>
-                </div>
-            }
 
-            @if (selectedSubject != null && selectedStage != null && selectedTopic == null)
-            {
-                <div class="selected-info">
-                    <span>@selectedSubject.Name -> @selectedStage.Name</span>
-                </div>
-            }
+    @if (selectedSubject != null)
+    {
+        <div class="column-mid">
+            <div class="info">
+                @if (selectedSubject != null && selectedStage == null && selectedTopic == null)
+                {
+                    <div class="selected-info">
+                        <span>@selectedSubject.Name</span>
+                    </div>
+                }
 
-            @if (selectedSubject != null && selectedStage != null && selectedTopic != null)
-            {
-                <div class="selected-info">
-                    <span>@selectedSubject.Name -> @selectedStage.Name -> @selectedTopic.Content</span>
-                </div>
-            }
+                @if (selectedSubject != null && selectedStage != null && selectedTopic == null)
+                {
+                    <div class="selected-info">
+                        <span>@selectedSubject.Name -> @selectedStage.Name</span>
+                    </div>
+                }
+
+                @if (selectedSubject != null && selectedStage != null && selectedTopic != null)
+                {
+                    <div class="selected-info">
+                        <span>@selectedSubject.Name -> @selectedStage.Name -> @selectedTopic.Content</span>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
-    <div class="column-right"></div>
+        <div class="column-right"></div>
+    }
 </div>
 
 <div class="container">
@@ -274,7 +278,7 @@
 
     private void Reset()
     {
-        stages  = null;
+        stages = null;
         topics = null;
 
         selectedSubject = null;

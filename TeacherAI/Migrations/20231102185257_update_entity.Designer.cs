@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeacherAI.EF;
 
@@ -10,9 +11,10 @@ using TeacherAI.EF;
 namespace TeacherAI.Migrations
 {
     [DbContext(typeof(TeacherContext))]
-    partial class TeacherContextModelSnapshot : ModelSnapshot
+    [Migration("20231102185257_update_entity")]
+    partial class update_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
