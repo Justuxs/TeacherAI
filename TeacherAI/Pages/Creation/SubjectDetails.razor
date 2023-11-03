@@ -61,13 +61,14 @@ else
 @code {
     [Parameter]
     public string id { get; set; }
+    public long subjectId;
 
     private Subject subject;
     private bool deleteMode = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int subjectId))
+        if (!string.IsNullOrEmpty(id) && long.TryParse(id, out long subjectId))
         {
             subject = await SubjectService.GetSubjectFullAsync(subjectId);//GetSubjectDetailsById(subjectId);
         }
@@ -99,7 +100,7 @@ else
         }
         else
         {
-            NavigationManager.NavigateTo($"/stagedetails/{stageId}");
+            NavigationManager.NavigateTo($"/stagedetails/{id}/{stageId}");
         }
     }
 

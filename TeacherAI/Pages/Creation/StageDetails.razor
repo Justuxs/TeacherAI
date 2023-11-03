@@ -1,4 +1,4 @@
-﻿@page "/stagedetails/{id}"
+﻿@page "/stagedetails/{subjectId}/{stageId}"
 @using TeacherAI.Data;
 @using TeacherAI.Service;
 @inject SubjectService SubjectService
@@ -58,11 +58,20 @@
 else
 {
     <p>No stage found.</p>
+    <form @onsubmit="AddTopic">
+        <input type="text" @bind="newTopicContent" />
+        <button type="submit">Add Topic</button>
+    </form>
 }
 
 @code {
     [Parameter]
-    public string id { get; set; }
+    public string subjectId { get; set; }
+    [Parameter]
+    public string stageId { get; set; }
+
+    public long subjectId_ { get; set; }
+    public long stageId_ { get; set; }
 
     private Stage stage;
     private string newTopicContent;
@@ -70,12 +79,14 @@ else
     private string editedTopicContent;
     private bool isEditModalOpen = false;
 
-    // Assuming you have a method to get stage details by ID
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrEmpty(id) && int.TryParse(id, out int stageId))
+        if (!string.IsNullOrEmpty(subjectId) && long.TryParse(subjectId, out long subjectId_) && !string.IsNullOrEmpty(stageId) && long.TryParse(stageId, out long stageId_))
         {
-            stage = GetStageDetailsById(stageId);
+            this.subjectId_ = subjectId_;
+            this.stageId_ = stageId_;
+
+            stage = await SubjectService.GetSubjectStageAsync(subjectId_, stageId_);
         }
         else
         {
@@ -107,18 +118,19 @@ else
         isEditModalOpen = false;
     }
 
-    private void DeleteTopic(Topic topic)
+    private async Task DeleteTopic(Topic topic)
     {
-        stage.Topics.Remove(topic);
+        await SubjectService.DeleteTopicAsync(topic.Id);
+        stage = await SubjectService.GetSubjectStageAsync(subjectId_, stageId_);
     }
 
-    private void AddTopic()
+    private async Task AddTopic()
     {
         if (!string.IsNullOrEmpty(newTopicContent))
         {
             var newTopic = new Topic { Content = newTopicContent };
-            stage.Topics.Add(newTopic);
-
+            await SubjectService.AddTopicToStageAsync(stageId_, newTopic);
+            stage = await SubjectService.GetSubjectStageAsync(subjectId_, stageId_);
             newTopicContent = string.Empty;
         }
     }

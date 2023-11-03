@@ -43,6 +43,24 @@ namespace TeacherAI.Service
             return subject;
         }
 
+        public async Task<Stage> GetSubjectStageAsync(long id, long stageId)
+        {
+            Subject subject = await _context.Subjects
+                .Where(s => s.Id == id)
+                .Include(s => s.Stages)
+                    .ThenInclude(stage => stage.Topics)
+                .FirstOrDefaultAsync();
+
+            if (subject != null)
+            {
+                Stage stage = subject.Stages.FirstOrDefault(s => s.Id == stageId);
+                return stage;
+            }
+
+            return null;
+        }
+
+
         public async Task DeleteSubjectAsync(long subjectId)
         {
             var subject = await _context.Subjects.FindAsync(subjectId);
@@ -76,6 +94,29 @@ namespace TeacherAI.Service
 
             // Step 3: Remove the Stage from the Subject's Stages Collection
             subject.Stages.Remove(stageToRemove);
+
+            // Step 4: Save Changes to the Database
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteTopicAsync(long topicId)
+        {
+            // Step 1: Retrieve the Topic
+            Topic topic = await _context.Topics
+                .Where(t => t.Id == topicId)
+                .FirstOrDefaultAsync();
+
+            if (topic == null)
+            {
+                throw new InvalidOperationException("Topic not found");
+            }
+
+            // Step 2: Remove the Topic from the associated Stage's Topics Collection
+            Stage associatedStage = topic.Stage;
+            associatedStage.Topics.Remove(topic);
+
+            // Step 3: Mark the Topic as Removed from DbContext
+            _context.Topics.Remove(topic);
 
             // Step 4: Save Changes to the Database
             await _context.SaveChangesAsync();
@@ -122,6 +163,32 @@ namespace TeacherAI.Service
 
             // Step 4: Add the Stage to the Subject's Stages Collection
             subject.Stages.Add(newStage);
+
+            // Step 5: Save Changes to the Database
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddTopicToStageAsync(long stageId, Topic newTopic)
+        {
+            // Step 1: Retrieve the Stage
+            Stage stage = await _context.Stages
+                .Where(s => s.Id == stageId)
+                .Include(s => s.Topics)
+                .FirstOrDefaultAsync();
+
+            if (stage == null)
+            {
+                throw new InvalidOperationException("Stage not found");
+            }
+
+            // Step 2: Create a New Topic (You can set other properties as needed)
+            // Topic newTopic = new Topic { Name = "New Topic Name", ... };
+
+            // Step 3: Associate the Topic with the Stage
+            newTopic.Stage = stage;
+
+            // Step 4: Add the Topic to the Stage's Topics Collection
+            stage.Topics.Add(newTopic);
 
             // Step 5: Save Changes to the Database
             await _context.SaveChangesAsync();
