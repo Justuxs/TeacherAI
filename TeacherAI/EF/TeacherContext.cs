@@ -24,7 +24,8 @@ namespace TeacherAI.EF
                 entity.Property(s => s.Name).IsRequired();
                 entity.HasMany(s => s.Stages)
                       .WithOne(stage => stage.Subject)
-                      .HasForeignKey(stage => stage.SubjectID);
+                      .HasForeignKey(stage => stage.SubjectID)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Topic>(entity =>
@@ -42,7 +43,8 @@ namespace TeacherAI.EF
                 entity.Property(s => s.Name).IsRequired();
                 entity.HasOne(s => s.Subject)
                 .WithMany(sub => sub.Stages)
-                .HasForeignKey(s => s.SubjectID);
+                .HasForeignKey(s => s.SubjectID)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

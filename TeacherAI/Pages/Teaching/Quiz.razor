@@ -1,0 +1,96 @@
+﻿<!-- Pages/Quiz.razor -->
+@page "/quiz"
+@using TeacherAI.Data;
+
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .question-container {
+        background-color: #3498db;
+        color: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+    }
+
+    .answer-button {
+        background-color: #2ecc71;
+        color: #fff;
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .score-container {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2ecc71;
+    }
+</style>
+
+<div class="quiz-container">
+    <h3>Quiz Page</h3>
+
+    <button class="answer-button" @onclick="ShowQuestion">Solve Question</button>
+
+    @if (showQuestion)
+    {
+        <div class="question-container">
+            <p>@question.Text</p>
+            @foreach (var answer in question.Answers)
+            {
+                <button class="answer-button" @onclick="()=>CheckAnswer(answer)">@answer</button>
+            }
+        </div>
+    }
+
+    <div class="score-container">
+        Score: @score
+    </div>
+</div>
+
+@code {
+    private Question question;
+    private bool showQuestion = false;
+    private int score = 0;
+
+    private void ShowQuestion()
+    {
+        // You can fetch questions from a database or define them here
+        question = new Question
+            {
+                Text = "What is the capital of France?",
+                Answers = new List<string> { "Berlin", "Paris", "London", "Madrid" },
+                CorrectAnswer = "Paris"
+            };
+
+        showQuestion = true;
+    }
+
+    private void CheckAnswer(string selectedAnswer)
+    {
+        if (selectedAnswer == question.CorrectAnswer)
+        {
+            // Handle correct answer
+            Console.WriteLine("Correct!");
+            score++;
+        }
+        else
+        {
+            // Handle incorrect answer
+            Console.WriteLine("Incorrect!");
+        }
+
+        // Reset for the next question
+        showQuestion = false;
+    }
+}

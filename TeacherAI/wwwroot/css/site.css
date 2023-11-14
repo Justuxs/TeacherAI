@@ -264,5 +264,43 @@ a {
     background-color: transparent;
     border: none;
     cursor: pointer;
-    padding: 0; 
+    padding: 0;
 }
+
+.beautiful-button {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 8px;
+    background: linear-gradient(to right, #4e8ef7, #7c66f5);
+    color: #ffffff;
+    border: 1px solid #4e8ef7;
+    transition: background 0.3s;
+}
+
+    .beautiful-button:hover {
+        background: linear-gradient(to right, #7c66f5, #4e8ef7);
+    }
+
+.beautiful-textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #f9f9f9, #e0e0e0);
+    color: #333;
+    resize: vertical;
+}
+
+.beautiful-textarea:focus {
+    outline: none;
+    border: 1px solid #4e8ef7; /* Change the border color on focus */
+    box-shadow: 0 0 5px rgba(78, 142, 247, 0.5); /* Add a subtle box shadow on focus */
+}
+

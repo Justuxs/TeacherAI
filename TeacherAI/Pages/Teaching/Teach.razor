@@ -1,5 +1,6 @@
 ﻿@page "/teach"
 @using TeacherAI.Data;
+@using TeacherAI.Pages.Teaching.Components
 @using TeacherAI.Service;
 @inject SubjectService SubjectService
 
@@ -59,10 +60,17 @@
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
     }
 
-    .selected-info span {
-        font-weight: bold;
+    .selected-info span::before {
+        content: '\2192'; /* Unicode character for right arrow */
+        margin-right: 5px; /* Adjust spacing between arrow and text */
+        text-align: center;
+        color: #007bff; /* Change arrow color to blue, you can use any color code */
     }
 
     .learning-container {
@@ -70,11 +78,12 @@
         border: 1px solid #ccc;
         border-radius: 5px;
         padding: 20px;
+        min-height: 70vh;
     }
 
     .text-area {
         width: 100%;
-        height: 100px;
+        height: 65vh;
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 5px;
@@ -87,121 +96,147 @@
         border: 1px solid #ccc;
         border-radius: 5px;
     }
+
 </style>
 
-<h3>Subject Selection</h3>
 
-<div class="row">
-    <div class="column-left">
-        <button @onclick="Reset">Reset</button>
+@if (subjects != null)
+{
+    <div class="text-center">
+        <h3>Mokymasis</h3>
     </div>
 
-    @if (selectedSubject != null)
-    {
-        <div class="column-mid">
-            <div class="info">
-                @if (selectedSubject != null && selectedStage == null && selectedTopic == null)
-                {
-                    <div class="selected-info">
-                        <span>@selectedSubject.Name</span>
-                    </div>
-                }
 
-                @if (selectedSubject != null && selectedStage != null && selectedTopic == null)
-                {
-                    <div class="selected-info">
-                        <span>@selectedSubject.Name -> @selectedStage.Name</span>
-                    </div>
-                }
-
-                @if (selectedSubject != null && selectedStage != null && selectedTopic != null)
-                {
-                    <div class="selected-info">
-                        <span>@selectedSubject.Name -> @selectedStage.Name -> @selectedTopic.Content</span>
-                    </div>
-                }
-            </div>
+    <div class="row">
+        <div class="column-left">
+            <button @onclick="Reset" class="beautiful-button">Reset</button>
         </div>
-        <div class="column-right"></div>
-    }
-</div>
 
-<div class="container">
+        @if (selectedSubject != null)
+        {
+            <div class="column-mid">
 
-
-
-    @if (!learningStarted && selectingSubject)
-    {
-        <div class="selection-row">
-            <div class="selection-box">
-                <h4>Select Subject</h4>
-                <select class="select-box" @onchange="HandleSubjectSelection">
-                    <option value="" disabled selected hidden>-- Select a subject --</option>
-                    @foreach (var subject in subjects)
+                <div class="info">
+                    @if (selectedSubject != null && selectedStage == null && selectedTopic == null)
                     {
-                        <option value="@subject.Name">@subject.Name</option>
+                        <div class="selected-info">
+                            <span>@selectedSubject.Name</span>
+                        </div>
                     }
-                </select>
-            </div>
-        </div>
-    }
 
-    @if (!learningStarted && selectingStage)
-    {
-        selectingSubject = false;
-        <div class="selection-row">
-            <div class="selection-box">
-                <h4>Select Stage</h4>
-                <select class="select-box" @onchange="HandleStageSelection">
-                    <option value="" disabled selected hidden>-- Select a stage --</option>
-                    @foreach (var stage in stages)
+                    @if (selectedSubject != null && selectedStage != null && selectedTopic == null)
                     {
-                        <option value="@stage.Name">@stage.Name</option>
+                        <div class="selected-info">
+                            <span>@selectedSubject.Name</span>
+                            <span>@selectedStage.Name</span>
+                        </div>
                     }
-                </select>
-            </div>
-        </div>
-    }
 
-    @if (!learningStarted && selectingTopic)
-    {
-        <div class="selection-row">
-            <div class="selection-box">
-                <h4>Select Topic</h4>
-                <select class="select-box" @onchange="HandleTopicSelection">
-                    <option value="" disabled selected hidden>-- Select a topic --</option>
-                    @foreach (var topic in topics)
+                    @if (selectedSubject != null && selectedStage != null && selectedTopic != null)
                     {
-                        <option value="@topic.Content">@topic.Content</option>
+                        <div class="selected-info">
+                            <span>@selectedSubject.Name</span>
+                            <span>@selectedStage.Name</span>
+                            <span>@selectedTopic.Content</span>
+                        </div>
                     }
-                </select>
+                </div>
             </div>
-        </div>
-    }
 
-    @if (isSelectionDone() && !learningStarted)
-    {
-        <div class="button-container">
-            <button @onclick="BeginLearning" class="button">Mokytis</button>
-        </div>
-    }
+            <div class="column-right"></div>
+        }
+    </div>
 
-    @if (learningStarted)
-    {
-        <div class="learning-container">
-            <h3>Learning Mode</h3>
-            <textarea class="text-area" placeholder="Begin learning..."></textarea>
+    <div class="container text-center border-3">
+        @if (!learningStarted && !isSelectionDone())
+        {
+            <h4>Dalyko pasirinkimas</h4>
+        }
+
+        @if (!learningStarted && selectingSubject)
+        {
+            <div class="selection-row">
+                <div class="selection-box">
+                    <h4>Select Subject</h4>
+                    <select class="select-box" @onchange="HandleSubjectSelection">
+                        <option value="" disabled selected hidden>-- Select a subject --</option>
+                        @foreach (var subject in subjects)
+                        {
+                            <option value="@subject.Name">@subject.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+
+        @if (!learningStarted && selectingStage)
+        {
+            selectingSubject = false;
+            <div class="selection-row">
+                <div class="selection-box">
+                    <h4>Select Stage</h4>
+                    <select class="select-box" @onchange="HandleStageSelection">
+                        <option value="" disabled selected hidden>-- Select a stage --</option>
+                        @foreach (var stage in stages)
+                        {
+                            <option value="@stage.Name">@stage.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+
+        @if (!learningStarted && selectingTopic)
+        {
+            <div class="selection-row">
+                <div class="selection-box">
+                    <h4>Select Topic</h4>
+                    <select class="select-box" @onchange="HandleTopicSelection">
+                        <option value="" disabled selected hidden>-- Select a topic --</option>
+                        @foreach (var topic in topics)
+                        {
+                            <option value="@topic.Content">@topic.Content</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+
+        @if (isSelectionDone() && !learningStarted)
+        {
             <div class="button-container">
-                <button class="button">Toliau</button>
-                <button class="button">Spresti testa</button>
+                <button @onclick="BeginLearning" class="beautiful-button">Mokytis</button>
             </div>
-            <div class="input-container">
-                <input type="text" class="input" placeholder="Klausti mokytojo" />
-            </div>
-        </div>
-    }
+        }
 
-</div>
+        @if (learningStarted && !quizShow)
+        {
+            <div class="learning-container modal-fullscreen-xl-down">
+                <textarea class="text-area beautiful-textarea" placeholder="Begin learning..."></textarea>
+
+                <div class="dropdown">
+                    <div class="input-container">
+                        <input type="text" class="input" placeholder="Klausti mokytojo" />
+                    </div>
+                    <div class="button-container">
+                        <button class="beautiful-button" @onclick="()=>quizShow = true" >Toliau</button>
+                        <button class="beautiful-button" @onclick="()=>quizShow = true">Spresti testa</button>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (quizShow && learningStarted)
+        {
+            <QuizComponent EndQuiz=@HandleEndQuiz />
+        }
+
+    </div>
+}
+else
+{
+    <div>Loading...</div>
+}
+
 
 @code {
     private List<Subject> subjects;
@@ -214,6 +249,7 @@
 
 
     private bool selectionDone = false;
+    private bool quizShow = false;
 
     private bool selectingSubject = true;
     private bool selectingStage = false;
@@ -225,7 +261,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        subjects = SubjectService.GenerateRandomSubjects(2, 2, 2);
+        subjects = await SubjectService.GetSubjectsFullAsync();
     }
 
     void HandleSubjectSelection(ChangeEventArgs e)
@@ -290,5 +326,10 @@
         selectingStage = false;
         selectingTopic = false;
         learningStarted = false;
+    }
+
+    private void HandleEndQuiz(bool quizEnded)
+    {
+        quizShow = false;
     }
 }
