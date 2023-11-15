@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using TeacherAI.Data;
 using TeacherAI.Data.API;
 
 namespace TeacherAI.Service
@@ -15,6 +16,8 @@ namespace TeacherAI.Service
 
         private string allChat = String.Empty;
         private string lastChat = String.Empty;
+
+        private Chat AllChat = new Chat();
 
         private string Subject;
         private string Scope;
@@ -32,6 +35,11 @@ namespace TeacherAI.Service
             return lastChat;
         }
 
+        public Chat GetChat()
+        {
+            return AllChat;
+        }
+
         public void SetParams(string subject, string scope, string topic)
         {
             Subject = subject;
@@ -47,6 +55,7 @@ namespace TeacherAI.Service
                 allChat += "\n";
             }
             allChat += message;
+            AllChat.AddMessage(message, "AI Teacher", true);
         }
 
         public async Task<bool> GenerateAIContent()
