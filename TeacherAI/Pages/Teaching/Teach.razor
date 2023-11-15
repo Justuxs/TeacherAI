@@ -3,7 +3,7 @@
 @using TeacherAI.Pages.Teaching.Components
 @using TeacherAI.Service;
 @inject SubjectService SubjectService
-
+@inject AIService AIService
 <style>
     /* Add your custom styles here */
     .container {
@@ -106,6 +106,12 @@
         <h3>Mokymasis</h3>
     </div>
 
+    @if (errorShow)
+    {
+        <div class="text-center">
+            <h2 class="alert-danger">Nepavyko susiekti su AI servizu</h2>
+        </div>
+    }
 
     <div class="row">
         <div class="column-left">
@@ -212,14 +218,14 @@
         @if (learningStarted && !quizShow)
         {
             <div class="learning-container modal-fullscreen-xl-down">
-                <textarea class="text-area beautiful-textarea" placeholder="Begin learning..."></textarea>
+                <textarea class="text-area non-editable-textarea beautiful-textarea" readonly placeholder="Begin learning..." @bind=TeacherContent></textarea>
 
                 <div class="dropdown">
                     <div class="input-container">
                         <input type="text" class="input" placeholder="Klausti mokytojo" />
                     </div>
                     <div class="button-container">
-                        <button class="beautiful-button" @onclick="()=>quizShow = true" >Toliau</button>
+                        <button class="beautiful-button" @onclick="GenerateContent">Toliau</button>
                         <button class="beautiful-button" @onclick="()=>quizShow = true">Spresti testa</button>
                     </div>
                 </div>
@@ -247,16 +253,17 @@ else
     private Stage selectedStage;
     private Topic selectedTopic;
 
-
     private bool selectionDone = false;
     private bool quizShow = false;
+    private bool errorShow = false;
 
     private bool selectingSubject = true;
     private bool selectingStage = false;
     private bool selectingTopic = false;
 
-
     private bool learningStarted = false;
+
+    private string TeacherContent = "";
 
 
     protected override async Task OnInitializedAsync()
@@ -307,10 +314,27 @@ else
         return (selectedTopic != null && selectedStage != null && selectedSubject != null);
     }
 
-    private void BeginLearning()
+    private async Task BeginLearning()
     {
-        learningStarted = true;
+        AIService.SetParams(selectedSubject.Name, selectedStage.Name, selectedTopic.Content);
+
+        await GenerateContent();
     }
+
+    public async Task GenerateContent()
+    {
+        if (await AIService.GenerateAIContent())
+        {
+            learningStarted = true;
+            errorShow = false;
+            TeacherContent = AIService.GetLastMessage();
+        }
+        else
+        {
+            errorShow = true;
+        }
+    }
+
 
     private void Reset()
     {

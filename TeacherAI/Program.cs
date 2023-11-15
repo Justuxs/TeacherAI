@@ -14,6 +14,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<SubjectService>();
+builder.Services.AddScoped<AIService>();
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
@@ -21,6 +22,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<TeacherContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddHttpClient("AIAPI", client =>
+{
+    client.BaseAddress = new Uri("http://127.0.0.1:5000/");
+});
 
 var app = builder.Build();
 

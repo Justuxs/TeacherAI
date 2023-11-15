@@ -304,3 +304,7 @@ a {
     box-shadow: 0 0 5px rgba(78, 142, 247, 0.5); /* Add a subtle box shadow on focus */
 }
 
+.non-editable-textarea {
+    font-size: 16px; /* Adjust the font size as needed */
+    line-height: 1.5; /* Adjust the line spacing as needed */
+}
