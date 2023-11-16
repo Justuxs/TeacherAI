@@ -1,5 +1,7 @@
 ﻿<!-- Pages/Quiz.razor -->
 @using TeacherAI.Data;
+@using TeacherAI.Service;
+
 
 <style>
     .quiz-container {
@@ -37,48 +39,80 @@
 </style>
 
 <div class="quiz-container">
-    <h3>Klausimas</h3>
 
-
-    @if (question != null)
+    @if (quiz != null)
     {
         <div class="question-container">
-            <p>@question.Text</p>
-            @foreach (var answer in question.Answers)
+            <h3>Klausimas</h3>
+
+            <p>@quiz.Klausimas</p>
+
+            @if (!isAnswered)
             {
-                <button class="answer-button" @onclick="()=>CheckAnswer(answer)">@answer</button>
+                @foreach (var answer in quiz.Atsakymai)
+                {
+                    var randomColor = GetRandomColor();
+
+                    <button class="answer-button" style="background-color: @randomColor" @onclick="()=>CheckAnswer(answer.Key)">@answer.Value</button>
+                }
             }
+            else
+            {
+                <div>
+                    <button class="beautiful-button">
+                        Paiškinimas
+                    </button>
+                    <button class="beautiful-button">
+                        Uždaryti
+                    </button>
+                </div>
+            }
+
         </div>
     }
 
-    <div class="score-container">
+    <!--<div class="score-container">
         Score: @score
-    </div>
+    </div>-->
 </div>
 
 @code {
     [Parameter]
     public EventCallback<bool> EndQuiz { get; set; }
 
-    private Question question;
+    [Parameter]
+    public AIService AIService { get; set; }
+
+    private Quiz quiz;
+
+    private Random random = new Random();
+
     private bool showQuestion = true;
+    private bool isAnswered = false;
+    private bool isAnsweredGood = false;
+
     private int score = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        question = new Question
-            {
-                Text = "What is the capital of France?",
-                Answers = new List<string> { "Berlin", "Paris", "London", "Madrid" },
-                CorrectAnswer = "Paris"
-            };
+        quiz = AIService.GetQuiz();
+
+    }
+
+    private string GetRandomColor()
+    {
+        var color = $"rgb({random.Next(256)}, {random.Next(256)}, {random.Next(256)})";
+        return color;
     }
 
     private async void CheckAnswer(string selectedAnswer)
     {
-        if (selectedAnswer == question.CorrectAnswer)
+        isAnswered = true;
+        isAnsweredGood = false;
+
+        if (selectedAnswer == quiz.TeisingasAtsakymas)
         {
-            // Handle correct answer
+            isAnsweredGood = true;
             Console.WriteLine("Correct!");
             score++;
         }
@@ -89,7 +123,7 @@
         }
 
         showQuestion = false;
-        await EndQuiz.InvokeAsync(true);
+        //await EndQuiz.InvokeAsync(true);
     }
 
 }

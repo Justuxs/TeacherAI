@@ -240,14 +240,14 @@
                         </div>
                         <div class="button-container">
                             <button class="beautiful-button" @onclick="GenerateContent">Toliau</button>
-                            <button class="beautiful-button" @onclick="()=>quizShow = true">Spresti testa</button>
+                            <button class="beautiful-button" @onclick="GenerateQuiz">Spresti testa</button>
                         </div>
                     </div>
                 </div>
             }
             @if (quizShow && learningStarted)
             {
-                <QuizComponent EndQuiz=@HandleEndQuiz />
+                <QuizComponent EndQuiz=@HandleEndQuiz AIService="AIService" />
             }
 
         </div>
@@ -278,8 +278,6 @@
     private bool selectingTopic = false;
 
     private bool learningStarted = false;
-
-    private string TeacherContent = "";
 
     private Chat SessionChat;
 
@@ -337,6 +335,7 @@
         AIService.SetParams(selectedSubject.Name, selectedStage.Name, selectedTopic.Content);
 
         await GenerateContent();
+        learningStarted = true;
     }
 
     public async Task GenerateContent()
@@ -345,9 +344,7 @@
 
         if (await AIService.GenerateAIContent())
         {
-            learningStarted = true;
             errorShow = false;
-            TeacherContent = AIService.GetLastMessage();
             SessionChat = AIService.GetChat();
         }
         else
@@ -359,6 +356,22 @@
 
     }
 
+    public async Task GenerateQuiz()
+    {
+        _isGenerating = true;
+
+        if (await AIService.GenerateQuiz())
+        {
+            errorShow = false;
+            quizShow = true;
+        }
+        else
+        {
+            errorShow = true;
+        }
+
+        _isGenerating = false;
+    }
 
     private void Reset()
     {

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.DotNet.MSIdentity.Shared;
+using Newtonsoft.Json;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -19,10 +21,15 @@ namespace TeacherAI.Service
 
         private Chat AllChat = new Chat();
 
+        private Chat QuizChat = new Chat();
+
+        private Quiz Quiz;
+
         private string Subject;
         private string Scope;
         private string Topic;
 
+        private Message QuizAnwser;
 
         // Inject HttpClient using constructor injection
         public AIService(IHttpClientFactory _httpClientFactory)
@@ -39,6 +46,17 @@ namespace TeacherAI.Service
         {
             return AllChat;
         }
+
+        public Quiz GetQuiz()
+        {
+            return Quiz;
+        }
+
+        public Message GetQuizAnswserMessage()
+        {
+            return QuizAnwser;
+        }
+
 
         public void SetParams(string subject, string scope, string topic)
         {
@@ -140,7 +158,7 @@ namespace TeacherAI.Service
 
                         var responseObject = JsonConvert.DeserializeObject<BasicResponseModel>(responseBody);
 
-                        if(responseObject != null)
+                        if (responseObject != null)
                         {
                             AddResponse(responseObject.response);
                             return true;
@@ -202,5 +220,104 @@ namespace TeacherAI.Service
             }
         }
 
+        public async Task<bool> GenerateQuiz()
+        {
+            Quiz = null;
+            try
+            {
+                if (sesionID == -1 && String.IsNullOrEmpty(allChat) && !await StartConversation())
+                {
+                    return false;
+                }
+
+                using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
+                {
+
+                    HttpResponseMessage response = await client.GetAsync($"/klausimas/{sesionID}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        var responseObject = JsonConvert.DeserializeObject<BasicResponseModel>(responseBody);
+
+                        if (responseObject != null)
+                        {
+                            var content = responseObject.response.Trim();
+
+                            var quiz = JsonConvert.DeserializeObject<Quiz>(content);
+                            if (quiz != null)
+                            {
+                                Quiz = quiz;
+                                QuizChat.AddMessage(Quiz.Klausimas, "AI Teacher", true);
+                                QuizAnwser = null;
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ProvideAnswer(string answer)
+        {
+            try
+            {
+                if (sesionID == -1 && String.IsNullOrEmpty(allChat) && Quiz == null && !await StartConversation())
+                {
+                    return false;
+                }
+
+                using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
+                {
+                    var payload = new
+                    {
+                        answer = answer
+                    };
+                    string jsonPayload = JsonConvert.SerializeObject(payload);
+
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await client.PostAsync($"/atsakymas/{sesionID}", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        var responseObject = JsonConvert.DeserializeObject<BasicResponseModel>(responseBody);
+
+                        if (responseObject != null)
+                        {
+                            QuizChat.AddMessage(answer, "User", false);
+                            QuizChat.AddMessage(responseObject.response, "AI Teacher", true);
+                            QuizAnwser = QuizChat.Messages.Last();
+                            Quiz.Atsakymas = answer;
+                            return true;
+
+                        }
+
+                        return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }
