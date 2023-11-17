@@ -340,3 +340,40 @@ a {
 
 
 
+.correct-answer {
+    animation: correctAnswerAnimation 5s ease infinite;
+}
+
+@keyframes correctAnswerAnimation {
+    0% {
+        background-color: #62db39; /* Initial color */
+    }
+
+    50% {
+        background-color: #5cb85c; /* Color during animation */
+    }
+
+    100% {
+        background-color: #62db39; /* Final color */
+    }
+}
+
+.wrong-answer {
+    animation: wrongAnswerAnimation 5s ease infinite;
+}
+
+@keyframes wrongAnswerAnimation {
+    0% {
+        background-color: #d40000; /* Initial color */
+    }
+
+    50% {
+        background-color: #fc5d5d; /* Color during animation */
+    }
+
+    100% {
+        background-color: #d40000; /* Final color */
+    }
+}
+
+

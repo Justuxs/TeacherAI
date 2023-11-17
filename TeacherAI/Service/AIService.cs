@@ -52,6 +52,14 @@ namespace TeacherAI.Service
             return Quiz;
         }
 
+
+        public Quiz UpdateQuiz(Quiz mainQuiz)
+        {
+            mainQuiz.UpdateQuiz(Quiz);
+            return mainQuiz;
+        }
+
+
         public Message GetQuizAnswserMessage()
         {
             return QuizAnwser;
@@ -271,6 +279,7 @@ namespace TeacherAI.Service
 
         public async Task<bool> ProvideAnswer(string answer)
         {
+            Thread.Sleep(3000);
             try
             {
                 if (sesionID == -1 && String.IsNullOrEmpty(allChat) && Quiz == null && !await StartConversation())
@@ -301,7 +310,7 @@ namespace TeacherAI.Service
                             QuizChat.AddMessage(answer, "User", false);
                             QuizChat.AddMessage(responseObject.response, "AI Teacher", true);
                             QuizAnwser = QuizChat.Messages.Last();
-                            Quiz.Atsakymas = answer;
+                            Quiz.Atsakymas = responseObject.response;
                             return true;
 
                         }

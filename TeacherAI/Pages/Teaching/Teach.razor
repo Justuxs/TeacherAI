@@ -247,7 +247,7 @@
             }
             @if (quizShow && learningStarted)
             {
-                <QuizComponent EndQuiz=@HandleEndQuiz AIService="AIService" />
+                <QuizComponent EndQuiz=@HandleEndQuiz DoLoading=@DoLoading AIService="AIService" />
             }
 
         </div>
@@ -392,5 +392,11 @@
     private void HandleEndQuiz(bool quizEnded)
     {
         quizShow = false;
+    }
+
+    private void DoLoading(bool isDoing)
+    {
+        _isGenerating = isDoing;
+        InvokeAsync(StateHasChanged);
     }
 }

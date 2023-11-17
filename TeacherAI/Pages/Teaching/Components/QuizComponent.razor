@@ -36,13 +36,29 @@
         font-weight: bold;
         color: #2ecc71;
     }
+
+    .message {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+        word-wrap: break-word;
+        background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    }
+
+    .sent {
+        background-color: #3498db;
+        color: #fff;
+        align-self: flex-end;
+    }
 </style>
 
-<div class="quiz-container">
+
+
+<div class="quiz-container ">
 
     @if (quiz != null)
     {
-        <div class="question-container">
+        <div class="question-container @(isAnswered? (isAnsweredGood? "correct-answer":"wrong-answer"): "")">
             <h3>Klausimas</h3>
 
             <p>@quiz.Klausimas</p>
@@ -58,11 +74,36 @@
             }
             else
             {
+                if (!isLoadingExplanation)
+                {
+                    if (!String.IsNullOrEmpty(@quiz.Atsakymas))
+                    {
+                        <div class="message sent">
+                            <div class="message-content">
+                                <p>@quiz.Atsakymas</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert-danger">
+                            <p>Nepavyko gauti paaiškinimo</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert-info">
+                        <p>Generuojamas paaiškinimas</p>
+                    </div>
+                }
+
+
                 <div>
-                    <button class="beautiful-button">
+                    <!-- <button class="beautiful-button">
                         Paiškinimas
-                    </button>
-                    <button class="beautiful-button">
+                    </button> -->
+                    <button class="beautiful-button" @onclick="()=>CloseComponent()">
                         Uždaryti
                     </button>
                 </div>
@@ -81,6 +122,9 @@
     public EventCallback<bool> EndQuiz { get; set; }
 
     [Parameter]
+    public EventCallback<bool> DoLoading { get; set; }
+
+    [Parameter]
     public AIService AIService { get; set; }
 
     private Quiz quiz;
@@ -90,6 +134,7 @@
     private bool showQuestion = true;
     private bool isAnswered = false;
     private bool isAnsweredGood = false;
+    private bool isLoadingExplanation = true;
 
     private int score = 0;
 
@@ -105,12 +150,13 @@
         return color;
     }
 
-    private async void CheckAnswer(string selectedAnswer)
+    private async Task CheckAnswer(string selectedAnswer)
     {
         isAnswered = true;
         isAnsweredGood = false;
+        isLoadingExplanation = true;
 
-        if (selectedAnswer == quiz.TeisingasAtsakymas)
+        if (selectedAnswer == quiz.Teisingas_atsakymas)
         {
             isAnsweredGood = true;
             Console.WriteLine("Correct!");
@@ -123,7 +169,24 @@
         }
 
         showQuestion = false;
+
+        await DoLoading.InvokeAsync(true);
+        Task.Run(async () =>
+       {
+           await AIService.ProvideAnswer(selectedAnswer);
+           quiz = AIService.UpdateQuiz(quiz);
+           isLoadingExplanation = false;
+           await DoLoading.InvokeAsync(false);
+           InvokeAsync(StateHasChanged);
+       });
+
         //await EndQuiz.InvokeAsync(true);
     }
+
+    private async Task CloseComponent()
+    {
+        await EndQuiz.InvokeAsync(isAnsweredGood);
+    }
+
 
 }
