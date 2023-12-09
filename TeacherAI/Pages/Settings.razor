@@ -1,0 +1,37 @@
+﻿@page "/settings"
+@using System.Diagnostics;
+@inherits ComponentBase
+
+<h1 class="text-center">Start Python API</h1>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <button class="btn btn-primary btn-block" @onclick="StartPythonApi">Start Python API</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private async Task StartPythonApi()
+    {
+        var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = @"C:\Users\pegas\source\repos\TeacherAI\TeacherAI\Python\DemoAPI.py",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+        process.Start();
+
+        // You can add additional logic here to interact with the Flask app
+        // For example, you can use HttpClient to send requests to the Flask API.
+
+        process.WaitForExit();
+    }
+}

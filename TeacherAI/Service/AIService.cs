@@ -84,6 +84,8 @@ namespace TeacherAI.Service
             AllChat.AddMessage(message, "AI Teacher", true);
         }
 
+
+
         public async Task<bool> GenerateAIContent()
         {
             lastChat = String.Empty;
@@ -99,6 +101,29 @@ namespace TeacherAI.Service
             }
 
             return await GenerateMoreContent();
+
+        }
+
+        public async Task<bool> GenerateAnswerContent(string quastion)
+        {
+            if (string.IsNullOrEmpty(quastion))
+            {
+                return false;
+            }
+
+            lastChat = String.Empty;
+
+            if (sesionID == -1 && !await StartConversation())
+            {
+                return false;
+            }
+
+            if (String.IsNullOrEmpty(allChat))
+            {
+                return await GenerateContent();
+            }
+
+            return await GenerateAnswer(quastion);
 
         }
 
@@ -201,6 +226,63 @@ namespace TeacherAI.Service
                 {
 
                     HttpResponseMessage response = await client.GetAsync($"/toliau/{sesionID}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        var responseObject = JsonConvert.DeserializeObject<BasicResponseModel>(responseBody);
+
+                        if (responseObject != null)
+                        {
+                            AddResponse(responseObject.response);
+                            return true;
+                        }
+
+                        return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> GenerateAnswer(string question)
+        {
+            if (string.IsNullOrEmpty(question))
+            {
+                throw new ArgumentException($"'{nameof(question)}' cannot be null or empty.", nameof(question));
+            }
+
+            try
+            {
+                if (sesionID == -1 && String.IsNullOrEmpty(allChat) && !await StartConversation())
+                {
+                    return false;
+                }
+
+                AllChat.AddMessage(question, "You", false);
+
+
+                using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
+                {
+
+                    var payload = new
+                    {
+                        question = question
+                    };
+
+                    string jsonPayload = JsonConvert.SerializeObject(payload);
+
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await client.PostAsync($"/atsakyk/{sesionID}", content);
 
                     if (response.IsSuccessStatusCode)
                     {

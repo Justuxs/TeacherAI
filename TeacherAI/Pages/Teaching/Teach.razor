@@ -236,7 +236,7 @@
                     <ChatComponent Chat="@SessionChat"></ChatComponent>
                     <div class="dropdown">
                         <div class="input-container">
-                            <input type="text" class="input" placeholder="Klausti mokytojo" />
+                            <input type="text" class="input" placeholder="Klausti mokytojo" @bind="message" @onkeydown="HandleKeyDown" />
                         </div>
                         <div class="button-container">
                             <button class="beautiful-button" @onclick="GenerateContent">Toliau</button>
@@ -280,6 +280,9 @@
     private bool learningStarted = false;
 
     private Chat SessionChat;
+    string message = string.Empty;
+    int maxLength = 100;
+
 
 
     protected override async Task OnInitializedAsync()
@@ -291,6 +294,7 @@
     {
         var subjectName = e.Value.ToString();
         Subject subject = subjects.FirstOrDefault(s => s.Name == subjectName);
+        string message = string.Empty;
 
         if (subject != null)
         {
@@ -398,5 +402,36 @@
     {
         _isGenerating = isDoing;
         InvokeAsync(StateHasChanged);
+    }
+    async Task HandleKeyDown(KeyboardEventArgs e){
+
+        if (e.Key == "Enter")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+            _isGenerating = true;
+
+
+            if (await AIService.GenerateAnswerContent(message))
+            {
+                errorShow = false;
+                SessionChat = AIService.GetChat();
+            }
+            else
+            {
+                errorShow = true;
+            }
+
+            _isGenerating = false;
+
+            message = string.Empty;
+        }
+        else if (message.Length >= 100 && e.Key != "Backspace")
+        {
+            message = message.Substring(0, Math.Min(message.Length, maxLength));
+        }
+        
     }
 }
