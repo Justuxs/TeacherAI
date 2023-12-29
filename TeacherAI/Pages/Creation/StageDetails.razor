@@ -2,20 +2,28 @@
 @using TeacherAI.Data;
 @using TeacherAI.Service;
 @inject SubjectService SubjectService
+@inject NavigationManager NavigationManager
 
-<h3>Stage Details</h3>
 
 @if (stage != null)
 {
+    <h3>Skyrius: @stage.Name</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <button class="back-button" @onclick="GoBack">Atgal</button>
+        </div>
+    </div>
+
     <div class="box-details text-center">
         <h4>@stage.Name</h4>
 
         <table class="table">
             <thead>
                 <tr>
-                    <th>Topic Content</th>
+                    <th>Tema</th>
                     <th>Keisti pozicija</th>
-                    <th>Ištrinti</th>
+                    <th>Veiksmai</th>
 
                 </tr>
             </thead>
@@ -29,17 +37,17 @@
                             <div class="action-column">
                                 @if (index != 0)
                                 {
-                                    <button @onclick="() => MoveTopicUp(topic)">Up</button>
+                                    <button @onclick="() => MoveTopicUp(topic)" class="btn-primary" >⬆️</button>
                                 }
                                 @if (index != stage.Topics.Count - 1)
                                 {
-                                    <button @onclick="() => MoveTopicDown(topic)">Down</button>
+                                    <button @onclick="() => MoveTopicDown(topic)" class="btn-primary" >⬇️</button>
                                 }
                             </div>
                         </td>
                         <td>
                             <div class="action-column">
-                                <button @onclick="() => DeleteTopic(topic)">Delete</button>
+                                <button @onclick="() => DeleteTopic(topic)" class="btn-danger">Ištrinti</button>
                             </div>
                         </td>
 
@@ -50,7 +58,7 @@
 
         <form @onsubmit="AddTopic">
             <input type="text" @bind="newTopicContent" />
-            <button type="submit">Add Topic</button>
+            <button type="submit">Pridėti temą</button>
         </form>
 
     </div>
@@ -60,7 +68,7 @@ else
     <p>No stage found.</p>
     <form @onsubmit="AddTopic">
         <input type="text" @bind="newTopicContent" />
-        <button type="submit">Add Topic</button>
+        <button type="submit">Pridėti temą</button>
     </form>
 }
 
@@ -92,6 +100,11 @@ else
         {
             stage = null;
         }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo($"/subjectdetails/{subjectId}");
     }
 
     private Stage GetStageDetailsById(int id)

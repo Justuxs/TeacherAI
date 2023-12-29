@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using TeacherAI.Data;
 using TeacherAI.Data.API;
 
@@ -73,7 +74,7 @@ namespace TeacherAI.Service
             Topic = topic;
         }
 
-        private void AddResponse(string message)
+        private void AddResponse(string message, bool isAnswered = false)
         {
             lastChat = message;
             if (!String.IsNullOrEmpty(allChat))
@@ -81,7 +82,8 @@ namespace TeacherAI.Service
                 allChat += "\n";
             }
             allChat += message;
-            AllChat.AddMessage(message, "AI Teacher", true);
+            AllChat.AddMessage(message, "AI Teacher", true, isAnswered);
+
         }
 
 
@@ -100,7 +102,7 @@ namespace TeacherAI.Service
                 return await GenerateContent();
             }
 
-            return await GenerateMoreContent();
+            return await GenerateMoreContentWithRetries();
 
         }
 
@@ -123,7 +125,7 @@ namespace TeacherAI.Service
                 return await GenerateContent();
             }
 
-            return await GenerateAnswer(quastion);
+            return await GenerateAnswerWithRetries(quastion);
 
         }
 
@@ -169,6 +171,9 @@ namespace TeacherAI.Service
                 }
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
+                    client.Timeout = TimeSpan.FromSeconds(8);
+
+
                     var payload = new
                     {
                         subject = Subject,
@@ -209,9 +214,30 @@ namespace TeacherAI.Service
             }
             catch (Exception ex)
             {
+                Console.WriteLine("EX respose : " + ex.Message);
                 return false;
             }
         }
+
+
+        public async Task<bool> GenerateMoreContentWithRetries(int maxRetries = 3)
+        {
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
+            {
+                if (await GenerateMoreContent())
+                {
+                    return true;
+                }
+
+                Console.WriteLine($"Retry #{retryCount + 1} failed.");
+
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+
+            return false;
+        }
+
+
 
         private async Task<bool> GenerateMoreContent()
         {
@@ -224,6 +250,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
+                    client.Timeout = TimeSpan.FromSeconds(8);
 
                     HttpResponseMessage response = await client.GetAsync($"/toliau/{sesionID}");
 
@@ -243,14 +270,33 @@ namespace TeacherAI.Service
                     }
                     else
                     {
+                        Console.WriteLine("BAD respose : " + await response.Content.ReadAsStringAsync());
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine("EX respose : " + ex.Message);
                 return false;
             }
+        }
+
+        public async Task<bool> GenerateAnswerWithRetries(string question, int maxRetries = 3)
+        {
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
+            {
+                if (await GenerateAnswer(question))
+                {
+                    return true;
+                }
+
+                Console.WriteLine($"Retry #{retryCount + 1} failed.");
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+            }
+
+            return false;
         }
 
         private async Task<bool> GenerateAnswer(string question)
@@ -272,6 +318,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
+                    client.Timeout = TimeSpan.FromSeconds(8);
 
                     var payload = new
                     {
@@ -292,7 +339,7 @@ namespace TeacherAI.Service
 
                         if (responseObject != null)
                         {
-                            AddResponse(responseObject.response);
+                            AddResponse(responseObject.response, true);
                             return true;
                         }
 
@@ -300,14 +347,33 @@ namespace TeacherAI.Service
                     }
                     else
                     {
+                        Console.WriteLine("BAD respose : " + await response.Content.ReadAsStringAsync());
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine("EX respose : " + ex.Message);
                 return false;
             }
+        }
+
+        public async Task<bool> GenerateQuizWithRetries(int maxRetries = 3)
+        {
+            for (int retryCount = 0; retryCount < maxRetries; retryCount++)
+            {
+                if (await GenerateQuiz())
+                {
+                    return true;
+                }
+
+                Console.WriteLine($"Retry #{retryCount + 1} failed.");
+
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+
+            return false;
         }
 
         public async Task<bool> GenerateQuiz()
@@ -322,6 +388,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
+                    client.Timeout = TimeSpan.FromSeconds(8);
 
                     HttpResponseMessage response = await client.GetAsync($"/klausimas/{sesionID}");
 
@@ -333,8 +400,19 @@ namespace TeacherAI.Service
 
                         if (responseObject != null)
                         {
-                            var content = responseObject.response.Trim();
+                            Console.WriteLine(responseObject.response);
+                            string parsedJson = ExtractJsonFromString(responseObject.response.Trim());
+                            Console.WriteLine("Isparsintas: " + parsedJson);
 
+                            string content = "";
+                            if (string.IsNullOrEmpty(parsedJson))
+                            {
+                                content = parsedJson;
+                            }
+                            else
+                            {
+                                content = responseObject.response.Trim();
+                            }
                             var quiz = JsonConvert.DeserializeObject<Quiz>(content);
                             if (quiz != null)
                             {
@@ -349,19 +427,29 @@ namespace TeacherAI.Service
                     }
                     else
                     {
+                        Console.WriteLine("BAD respose : " + await response.Content.ReadAsStringAsync());
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine("parsinimo klaida : " + ex.Message);
+
                 return false;
             }
         }
 
+        static string ExtractJsonFromString(string inputString)
+        {
+            string jsonPattern = @"\{.*\}";
+            Match match = Regex.Match(inputString, jsonPattern);
+
+            return match.Success ? match.Value : null;
+        }
+
         public async Task<bool> ProvideAnswer(string answer)
         {
-            Thread.Sleep(3000);
             try
             {
                 if (sesionID == -1 && String.IsNullOrEmpty(allChat) && Quiz == null && !await StartConversation())
@@ -371,6 +459,8 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
+                    client.Timeout = TimeSpan.FromSeconds(8);
+
                     var payload = new
                     {
                         answer = answer
@@ -390,7 +480,7 @@ namespace TeacherAI.Service
                         if (responseObject != null)
                         {
                             QuizChat.AddMessage(answer, "User", false);
-                            QuizChat.AddMessage(responseObject.response, "AI Teacher", true);
+                            QuizChat.AddMessage(responseObject.response, "AI Teacher", false);
                             QuizAnwser = QuizChat.Messages.Last();
                             Quiz.Atsakymas = responseObject.response;
                             return true;
@@ -401,12 +491,14 @@ namespace TeacherAI.Service
                     }
                     else
                     {
+                        Console.WriteLine("BAD respose : " + await response.Content.ReadAsStringAsync());
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine("EX respose : " + ex.Message);
                 return false;
             }
         }

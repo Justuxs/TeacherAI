@@ -5,4 +5,11 @@
     Layout = "_Layout";
 }
 
+<script>
+    window.scrollToBottom = (element) => {
+        element.scrollTop = element.scrollHeight;
+    }
+</script>
+
 <component type="typeof(App)" render-mode="ServerPrerendered" />
+

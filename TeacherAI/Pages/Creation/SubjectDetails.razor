@@ -5,26 +5,26 @@
 @inject SubjectService SubjectService
 @inject NavigationManager NavigationManager
 
-<h3>Subject Details</h3>
-
 @if (subject != null)
 {
+    <h3>Mokymosi dalykas: @subject.Name</h3>
+
     <div class="row">
         <div class="col-md-4">
-            <button class="back-button" @onclick="GoBack">Back</button>
+            <button class="back-button" @onclick="GoBack">Atgal</button>
         </div>
         <div class="col-md-4 text-center">
             <input type="text" @bind="newStageName" />
-            <button class="add-stage-button" @onclick="AddStage">Add Stage</button>
+            <button class="add-stage-button" @onclick="AddStage">Pridėti skyrių</button>
         </div>
         <div class="col-md-4 text-right">
             @if (deleteMode)
             {
-                <button class="delete-button-active" @onclick="ToggleDeleteMode">Cancel Delete</button>
+                <button class="delete-button-active" @onclick="ToggleDeleteMode">Atšaukti ištrinymą</button>
             }
             else
             {
-                <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Delete Stages</span></button>
+                <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Ištrinti skyrių</span></button>
             }
         </div>
     </div>

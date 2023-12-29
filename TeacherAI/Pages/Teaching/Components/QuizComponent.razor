@@ -100,14 +100,11 @@
                 }
 
 
-                <div>
-                    <!-- <button class="beautiful-button">
-                        Paiškinimas
-                    </button> -->
-                    <button class="beautiful-button" @onclick="()=>CloseComponent()">
-                        Uždaryti
-                    </button>
+                <div> 
+                    <button class="beautiful-button" @onclick="() =>CloseComponent()"> Uždaryti </button> 
+                    <button class="beautiful-button" @onclick="() =>Next()"> Kitas </button> 
                 </div>
+
             }
 
         </div>
@@ -121,6 +118,9 @@
 @code {
     [Parameter]
     public EventCallback<bool> EndQuiz { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> NextQuiz { get; set; }
 
     [Parameter]
     public EventCallback<bool> DoLoading { get; set; }
@@ -142,8 +142,12 @@
     protected override async Task OnInitializedAsync()
     {
         quiz = AIService.GetQuiz();
-
+        showQuestion = true;
+        isAnswered = false;
+        isAnsweredGood = false;
+        isLoadingExplanation = true;
     }
+
 
     private string GetRandomColor()
     {
@@ -187,6 +191,17 @@
     private async Task CloseComponent()
     {
         await EndQuiz.InvokeAsync(isAnsweredGood);
+    }
+
+    private async Task Next()
+    {
+        await NextQuiz.InvokeAsync(isAnsweredGood);
+        quiz = AIService.GetQuiz();
+        showQuestion = true;
+        isAnswered = false;
+        isAnsweredGood = false;
+        isLoadingExplanation = true;
+        StateHasChanged();
     }
 
 

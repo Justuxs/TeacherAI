@@ -1,9 +1,97 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+<PageTitle>TeacherAI</PageTitle>
+<div class="non-spinning-gradient">
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+    <header>
+        <h1>Sugeneruoto mokymo turinio programa</h1>
+    </header>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <main>
+        <section class="about">
+            <h2>Apie programą</h2>
+            <p>
+                Ši programa sugeneruoja interaktyvius ir individualizuotus mokymo kursus studentams pagal jų poreikius ir lūkesčius. Programa naudoja ObenAI ChatGPT, Vikipedijos ir Longchain bibliotekas, kad sukurti unikalius ir vertingus mokymo metodus.
+            </p>
+            <p>
+                Programa yra skirta studentams, kurie nori efektyviai mokytis ir pasiekti gerus rezultatus. Ji taip pat gali būti naudojama mokytojams, kurie nori papildyti savo pamokos medžiagą ir individualizuoti mokymą kiekvienam studentui.
+            </p>
+        </section>
+
+        <section class="features">
+            <h2>Pagrindinės funkcijos</h2>
+            <ul>
+                <li>Individualizuotų mokymo kursų generavimas</li>
+                <li>Interaktyvūs ir dinamiški mokymo metodai</li>
+                <li>Plačiai naudojamos bibliotekos (ObenAI ChatGPT, Vikipedija, Longchain)</li>
+                <li>Paprastas ir intuityvus dizainas</li>
+                <li>Pritaikoma įvairių sričių studentams</li>
+            </ul>
+        </section>
+
+        <section class="benefits">
+            <h2>Praktiniai privalumai</h2>
+            <ul>
+                <li>Efektyvesnis mokymasis</li>
+                <li>Geresni mokymosi rezultatai</li>
+                <li>Sustiprintos mokymosi motyvacijos</li>
+                <li>Individualizuotų mokymo metodų pritaikymas</li>
+                <li>Didesnis mokymosi lankstumas</li>
+            </ul>
+        </section>
+
+
+    </main>
+
+    <footer>
+        <p>Copyright © 2023 Sugeneruoto mokymo turinio programa. Visi teisiškai saugomi.</p>
+    </footer>
+</div>
+
+
+<style>
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background-color: #f2f2f2;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 30px;
+        margin-bottom: 20px;
+    }
+
+    main {
+        margin: 0 auto;
+        width: 80%;
+        padding: 20px;
+    }
+
+    .about, .features, .benefits, .contact {
+        border: 1px solid #ccc;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .features, .benefits {
+        list-style: none;
+        margin-left: 0;
+    }
+
+        .features li, .benefits li {
+            margin-top: 10px;
+        }
+
+    footer {
+        background-color: #ccc;
+        padding: 20px;
+        text-align: center;
+    }
+</style>

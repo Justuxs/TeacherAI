@@ -7,9 +7,9 @@
 
         public Chat() { }
 
-        public void AddMessage(string content, string sender_, bool isGenerated)
+        public void AddMessage(string content, string sender_, bool isGenerated, bool isAnswered = false)
         {
-            Messages.Add(new Message(content, sender_, isGenerated));
+            Messages.Add(new Message(content, sender_, isGenerated, isAnswered));
         }
 
 

@@ -1,6 +1,7 @@
 ﻿<!-- Pages/Chat.razor -->
 @page "/Chat"
 @using TeacherAI.Data;
+@inject IJSRuntime JSRuntime
 
 <style>
     body, html {
@@ -51,10 +52,17 @@
         color: #fff;
         align-self: flex-start;
     }
+    
+    .answered {
+        background-image: linear-gradient(180deg, #3498db 0%, #3a0647 70%);
+
+        color: #fff;
+        align-self: flex-start;
+    }
 
 </style>
 
-<div class="chat-container">
+<div class="chat-container" @ref="chatContainerRef">
     <div class="chat-header">
         <span>AI mokytojas</span>
     </div>
@@ -63,7 +71,7 @@
     {
         @foreach (Message message in Chat.Messages)
         {
-            <div class="message @(message.isGenerated? "sent" : "received" ) ">
+            <div class="message @(!message.isGenerated? "received" : (message.isAnswered? "answered" : "sent") ) ">
                 <div class="message-content">
                     <p> @message.Content</p>
                 </div>
@@ -74,4 +82,18 @@
 @code {
     [Parameter]
     public Chat Chat { get; set; }
+
+    private ElementReference chatContainerRef;
+
+
+    private async Task ScrollToBottom()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollToBottom", chatContainerRef);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ScrollToBottom();
+    }
+
 }

@@ -107,7 +107,6 @@
 
 
 <div class="@(_isGenerating ? "spinning-gradient" : "non-spinning-gradient")">
-    <!-- Your content goes here -->
     @if (subjects != null)
     {
         <div class="text-center">
@@ -122,9 +121,13 @@
         }
 
         <div class="row">
-            <div class="column-left">
-                <button @onclick="Reset" class="beautiful-button">Reset</button>
-            </div>
+
+            @if (!selectingSubject)
+            {
+                <div class="column-left">
+                    <button @onclick="Reset" class="beautiful-button">Atgal</button>
+                </div>
+            }
 
             @if (selectedSubject != null)
             {
@@ -171,9 +174,9 @@
             {
                 <div class="selection-row">
                     <div class="selection-box">
-                        <h4>Select Subject</h4>
+                        <h4>Pasirinkti dalyką</h4>
                         <select class="select-box" @onchange="HandleSubjectSelection">
-                            <option value="" disabled selected hidden>-- Select a subject --</option>
+                            <option value="" disabled selected hidden>-- Pasirink dalyką --</option>
                             @foreach (var subject in subjects)
                             {
                                 <option value="@subject.Name">@subject.Name</option>
@@ -188,9 +191,9 @@
                 selectingSubject = false;
                 <div class="selection-row">
                     <div class="selection-box">
-                        <h4>Select Stage</h4>
+                        <h4>Pasirinkti skyrių</h4>
                         <select class="select-box" @onchange="HandleStageSelection">
-                            <option value="" disabled selected hidden>-- Select a stage --</option>
+                            <option value="" disabled selected hidden>-- Pasirink skyrių --</option>
                             @foreach (var stage in stages)
                             {
                                 <option value="@stage.Name">@stage.Name</option>
@@ -204,9 +207,9 @@
             {
                 <div class="selection-row">
                     <div class="selection-box">
-                        <h4>Select Topic</h4>
+                        <h4>Pasirinkti temą</h4>
                         <select class="select-box" @onchange="HandleTopicSelection">
-                            <option value="" disabled selected hidden>-- Select a topic --</option>
+                            <option value="" disabled selected hidden>-- Pasirink temą --</option>
                             @foreach (var topic in topics)
                             {
                                 <option value="@topic.Content">@topic.Content</option>
@@ -228,26 +231,28 @@
                 <div class="learning-container modal-fullscreen-xl-down">
 
 
-                    <!--
-                                      <textarea class="text-area non-editable-textarea beautiful-textarea" readonly placeholder="Begin learning..." @bind=TeacherContent></textarea>
-
-                    -->
-
                     <ChatComponent Chat="@SessionChat"></ChatComponent>
                     <div class="dropdown">
-                        <div class="input-container">
-                            <input type="text" class="input" placeholder="Klausti mokytojo" @bind="message" @onkeydown="HandleKeyDown" />
+
+                        <div class="container mt-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Klausti mokytojo" @bind="message" @onkeydown="HandleKeyDown" />  
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" @onclick="AskQuestion" id="sendButton">Klausti</button>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="button-container">
-                            <button class="beautiful-button" @onclick="GenerateContent">Toliau</button>
-                            <button class="beautiful-button" @onclick="GenerateQuiz">Spresti testa</button>
+                            <button class="beautiful-button" @onclick="GenerateContent">Generuoti medžiagą toliau</button>
+                            <button class="beautiful-button" @onclick="GenerateQuiz">Spresti testą</button>
                         </div>
                     </div>
                 </div>
             }
             @if (quizShow && learningStarted)
             {
-                <QuizComponent EndQuiz=@HandleEndQuiz DoLoading=@DoLoading AIService="AIService" />
+                <QuizComponent EndQuiz=@HandleEndQuiz DoLoading=@DoLoading AIService="AIService" NextQuiz=@HandleNextQuiz />
             }
 
         </div>
@@ -364,7 +369,7 @@
     {
         _isGenerating = true;
 
-        if (await AIService.GenerateQuiz())
+        if (await AIService.GenerateQuizWithRetries())
         {
             errorShow = false;
             quizShow = true;
@@ -395,13 +400,43 @@
 
     private void HandleEndQuiz(bool quizEnded)
     {
+        _isGenerating = false;
         quizShow = false;
+    }
+    private async Task HandleNextQuiz(bool quizEnded)
+    {
+        //quizShow = false;
+        await GenerateQuiz();
+        quizShow = false;
+        quizShow = true;
     }
 
     private void DoLoading(bool isDoing)
     {
         _isGenerating = isDoing;
         InvokeAsync(StateHasChanged);
+    }
+
+    async Task AskQuestion()
+    {
+        if (!String.IsNullOrEmpty(message))
+        {
+            _isGenerating = true;
+
+
+            if (await AIService.GenerateAnswerContent(message))
+            {
+                errorShow = false;
+                SessionChat = AIService.GetChat();
+            }
+            else
+            {
+                errorShow = true;
+            }
+
+            _isGenerating = false;
+            message = string.Empty;
+        }
     }
     async Task HandleKeyDown(KeyboardEventArgs e){
 

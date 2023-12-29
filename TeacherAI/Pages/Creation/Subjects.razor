@@ -6,27 +6,27 @@
 
 <div class="row">
     <div class="col-md-4">
-        <h3>All Subjects</h3>
+        <h3>Mokymosi programos dalykai</h3>
     </div>
     <div class="col-md-4 text-center">
         <input type="text" @bind="newSubjectName" />
-        <button class="add-stage-button" @onclick="AddSubject">Add Stage</button>
+        <button class="add-stage-button" @onclick="AddSubject">Pridėti dalyką</button>
     </div>
     <div class="col-md-4 text-right">
         @if (deleteMode)
         {
-            <button class="delete-button-active" @onclick="ToggleDeleteMode">Cancel Delete</button>
+            <button class="delete-button-active" @onclick="ToggleDeleteMode">Atšaukti ištrinymą</button>
         }
         else
         {
-            <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Delete Stages</span></button>
+            <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Ištrinti dalyką</span></button>
         }
     </div>
 </div>
 
 @if (subjects == null)
 {
-    <div>Loading...</div>
+    <div>Kraunasi...</div>
 }
 else
 {
