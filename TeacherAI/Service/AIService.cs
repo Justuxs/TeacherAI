@@ -1,5 +1,6 @@
 ﻿using Microsoft.DotNet.MSIdentity.Shared;
 using Newtonsoft.Json;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
@@ -171,7 +172,7 @@ namespace TeacherAI.Service
                 }
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(8);
+                    client.Timeout = TimeSpan.FromSeconds(15);
 
 
                     var payload = new
@@ -220,7 +221,7 @@ namespace TeacherAI.Service
         }
 
 
-        public async Task<bool> GenerateMoreContentWithRetries(int maxRetries = 3)
+        public async Task<bool> GenerateMoreContentWithRetries(int maxRetries = 2)
         {
             for (int retryCount = 0; retryCount < maxRetries; retryCount++)
             {
@@ -250,7 +251,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(8);
+                    client.Timeout = TimeSpan.FromSeconds(15);
 
                     HttpResponseMessage response = await client.GetAsync($"/toliau/{sesionID}");
 
@@ -282,7 +283,7 @@ namespace TeacherAI.Service
             }
         }
 
-        public async Task<bool> GenerateAnswerWithRetries(string question, int maxRetries = 3)
+        public async Task<bool> GenerateAnswerWithRetries(string question, int maxRetries = 2)
         {
             for (int retryCount = 0; retryCount < maxRetries; retryCount++)
             {
@@ -318,7 +319,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(8);
+                    client.Timeout = TimeSpan.FromSeconds(15);
 
                     var payload = new
                     {
@@ -359,7 +360,7 @@ namespace TeacherAI.Service
             }
         }
 
-        public async Task<bool> GenerateQuizWithRetries(int maxRetries = 3)
+        public async Task<bool> GenerateQuizWithRetries(int maxRetries = 2)
         {
             for (int retryCount = 0; retryCount < maxRetries; retryCount++)
             {
@@ -388,7 +389,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(8);
+                    client.Timeout = TimeSpan.FromSeconds(15);
 
                     HttpResponseMessage response = await client.GetAsync($"/klausimas/{sesionID}");
 
@@ -459,7 +460,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(8);
+                    client.Timeout = TimeSpan.FromSeconds(15);
 
                     var payload = new
                     {
@@ -500,6 +501,32 @@ namespace TeacherAI.Service
             {
                 Console.WriteLine("EX respose : " + ex.Message);
                 return false;
+            }
+        }
+
+        public async Task<bool> SetKey(string apiKey)
+        {
+
+            using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
+            {
+
+                var payload = new
+                {
+                    api_key = apiKey
+                };
+
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PostAsync($"/key", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

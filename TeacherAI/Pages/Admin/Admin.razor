@@ -1,0 +1,72 @@
+﻿@page "/admin/set-api-key"
+@using System.Net.Http
+@using System.Threading.Tasks
+@using TeacherAI.Service;
+@inject AIService AIService
+<h3>Set API Key</h3>
+
+@if (status >= 0)
+{
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <form @onsubmit="SetApiKey">
+                    <div class="mb-3">
+                        <label for="apiKey" class="form-label">API Key:</label>
+                        <input type="text" class="form-control" id="apiKey" @bind="apiKey" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Set</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+@if (status == -1)
+{
+    <div class="alert-info">
+        <h4>Siunčiama... </h4>
+    </div>
+}
+@if (status == 1)
+{
+    <div class="alert-success">
+        <h4>Pavyko </h4>
+    </div>
+}
+@if (status == 2)
+{
+    <div class="alert-danger">
+        <h4>Nepvayko</h4>
+    </div>
+}
+@code {
+    private string apiKey;
+    private int status = 0;
+
+    private async Task SetApiKey()
+    {
+        status = 0;
+        try
+        {
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                status = -1;
+                StateHasChanged();
+                var res = await AIService.SetKey(apiKey);
+                if (res)
+                {
+                    status = 1;
+                }
+                else
+                {
+                    status = 2;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            status = 2;
+        }
+        apiKey = "";
+    }
+}

@@ -113,6 +113,13 @@
             <h3>Mokymasis</h3>
         </div>
 
+        @if (dberrorShow)
+        {
+            <div class="text-center">
+                <h2 class="alert-danger">Duomenų duombazė startuojama. Prašome perktrauti puslapį.</h2>
+            </div>
+        }
+
         @if (errorShow)
         {
             <div class="text-center">
@@ -259,7 +266,8 @@
     }
     else
     {
-        <div>Loading...</div>
+
+        <div class="alert-info center p-5 justify-content-center"> <h4>Kraunasi...</h4></div>
     }
 
 </div>
@@ -276,6 +284,7 @@
     private bool selectionDone = false;
     private bool quizShow = false;
     private bool errorShow = false;
+    private bool dberrorShow = false;
     private bool _isGenerating = false;
 
     private bool selectingSubject = true;
@@ -292,7 +301,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        subjects = await SubjectService.GetSubjectsFullAsync();
+        _isGenerating = true;
+        try
+        {
+            subjects = await SubjectService.GetSubjectsFullAsync();
+        }
+        catch(Exception ex)
+        {
+            dberrorShow = true;
+        }
+        _isGenerating = false;
+
     }
 
     void HandleSubjectSelection(ChangeEventArgs e)

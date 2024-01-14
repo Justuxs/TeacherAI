@@ -8,27 +8,39 @@
     <div class="col-md-4">
         <h3>Mokymosi programos dalykai</h3>
     </div>
-    <div class="col-md-4 text-center">
-        <input type="text" @bind="newSubjectName" />
-        <button class="add-stage-button" @onclick="AddSubject">Pridėti dalyką</button>
-    </div>
-    <div class="col-md-4 text-right">
-        @if (deleteMode)
-        {
-            <button class="delete-button-active" @onclick="ToggleDeleteMode">Atšaukti ištrinymą</button>
-        }
-        else
-        {
-            <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Ištrinti dalyką</span></button>
-        }
-    </div>
+
+    @if (dberror == true)
+    {
+        <div class="text-center">
+            <h2 class="alert-danger">Duomenų duombazė startuojama. Prašome perktrauti puslapį.</h2>
+        </div>
+    }
+    @if (loading)
+    {
+        <div class="alert-info">
+            <h4>Kraunasi...</h4>
+        </div>
+    }
+    @if(dberror == false && loading == false)
+    {
+        <div class="col-md-4 text-center">
+            <input type="text" @bind="newSubjectName" />
+            <button class="add-stage-button" @onclick="AddSubject">Pridėti dalyką</button>
+        </div>
+        <div class="col-md-4 text-right">
+            @if (deleteMode)
+            {
+                <button class="delete-button-active" @onclick="ToggleDeleteMode">Atšaukti ištrinymą</button>
+            }
+            else
+            {
+                <button class="delete-button-inactive" @onclick="ToggleDeleteMode"><span>Ištrinti dalyką</span></button>
+            }
+        </div>
+    }
 </div>
 
-@if (subjects == null)
-{
-    <div>Kraunasi...</div>
-}
-else
+@if (subjects != null)
 {
 
     <div class="flex-container">
@@ -50,10 +62,23 @@ else
     private List<Subject> subjects;
     private string newSubjectName;
     private bool deleteMode = false;
+    private bool dberror = false;
+    private bool loading = false;
 
     protected override async Task OnInitializedAsync()
     {
-        subjects = await SubjectService.GetSubjectsAsync();
+        loading = true;
+        try
+        {
+            subjects = await SubjectService.GetSubjectsAsync();
+            dberror = false;
+        }
+        catch (Exception ex)
+        {
+            dberror = true;
+        }
+        loading = false;
+
     }
 
     private async Task GoToStageDetails(long stageId)
