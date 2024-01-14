@@ -172,7 +172,7 @@ namespace TeacherAI.Service
                 }
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromSeconds(20);
 
 
                     var payload = new
@@ -251,7 +251,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromSeconds(20);
 
                     HttpResponseMessage response = await client.GetAsync($"/toliau/{sesionID}");
 
@@ -389,7 +389,7 @@ namespace TeacherAI.Service
 
                 using (HttpClient client = httpClientFactory.CreateClient("AIAPI"))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromSeconds(20);
 
                     HttpResponseMessage response = await client.GetAsync($"/klausimas/{sesionID}");
 
@@ -402,8 +402,13 @@ namespace TeacherAI.Service
                         if (responseObject != null)
                         {
                             Console.WriteLine(responseObject.response);
-                            string parsedJson = ExtractJsonFromString(responseObject.response.Trim());
-                            Console.WriteLine("Isparsintas: " + parsedJson);
+                            string parsedJson = ExtractJsonFromString(responseObject.response);
+                            Console.WriteLine("EXTRAXTED: " + parsedJson);
+                            parsedJson = parsedJson.Replace("\n", "");
+                            Console.WriteLine("EXTRAXTED2: " + parsedJson);
+                            parsedJson = parsedJson.Replace("\\", "");
+                            Console.WriteLine("EXTRAXTED3: " + parsedJson);
+                            parsedJson = parsedJson.Replace("\\", "");
 
                             string content = "";
                             if (string.IsNullOrEmpty(parsedJson))
@@ -412,8 +417,10 @@ namespace TeacherAI.Service
                             }
                             else
                             {
-                                content = responseObject.response.Trim();
+                                content = responseObject.response;
                             }
+                            Console.WriteLine("Patrimintas: " + content);
+
                             var quiz = JsonConvert.DeserializeObject<Quiz>(content);
                             if (quiz != null)
                             {

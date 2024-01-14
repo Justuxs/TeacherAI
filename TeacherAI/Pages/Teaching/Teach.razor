@@ -4,6 +4,7 @@
 @using TeacherAI.Service;
 @inject SubjectService SubjectService
 @inject AIService AIService
+@inject NavigationManager NavigationManager
 
 <head>
     <link rel="stylesheet" href="~/css/spining.css" />
@@ -403,18 +404,7 @@
 
     private void Reset()
     {
-        stages = null;
-        topics = null;
-
-        selectedSubject = null;
-        selectedStage = null;
-        selectedTopic = null;
-
-        selectionDone = false;
-        selectingSubject = true;
-        selectingStage = false;
-        selectingTopic = false;
-        learningStarted = false;
+        NavigationManager.NavigateTo($"/Teach",true);
     }
 
     private void HandleEndQuiz(bool quizEnded)

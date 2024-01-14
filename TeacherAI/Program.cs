@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<SubjectService>();
-builder.Services.AddScoped<AIService>();
+builder.Services.AddTransient<AIService>();
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
