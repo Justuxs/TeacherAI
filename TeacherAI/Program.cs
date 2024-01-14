@@ -24,8 +24,8 @@ builder.Services.AddDbContext<TeacherContext>(options =>
 
 builder.Services.AddHttpClient("AIAPI", client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:5000/");
-    //client.BaseAddress = new Uri("https://teacherapi.azurewebsites.net/");
+    //client.BaseAddress = new Uri("http://127.0.0.1:5000/");
+    client.BaseAddress = new Uri("https://teacherapi.azurewebsites.net/");
 });
 
 var app = builder.Build();
