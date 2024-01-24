@@ -453,7 +453,7 @@ namespace TeacherAI.Service
             string jsonPattern = @"\{.*\}";
             Match match = Regex.Match(inputString, jsonPattern);
 
-            return match.Success ? match.Value : null;
+            return match.Success ? match.Value : inputString;
         }
 
         public async Task<bool> ProvideAnswer(string answer)
